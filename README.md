@@ -13,6 +13,21 @@ pnpm install
 pnpm demo
 ```
 
+## ブラウザで描画するまでのフロー
+
+`.svelte` ファイルを `compile()` でビルドしてJSモジュールを出力し、それを `index.html` から読み込んでブラウザに描画するまでの一連のフローも試せます。
+
+```sh
+pnpm serve
+# -> http://localhost:3000 を開く
+```
+
+1. `src/build.ts` が `src/App.svelte` を読み込んで `compile()` を実行し、生成されたJS（`render(target)` を export するESモジュール）を `public/app.js` に書き出す（本家で言う vite-plugin-svelte のミニ版。analyze フェーズの警告もここで表示される）
+2. `src/serve.ts`（`node:http` 製の最小静的サーバー）が `public/` を配信する
+3. `public/index.html` が `<script type="module">` で `./app.js` を import し、`render(document.getElementById("app"))` を呼んでDOMを構築する
+
+ビルドだけ行う場合は `pnpm build:app` を実行してください。
+
 ## 本家Svelteとの対応表
 
 | このサンプル                                    | 本家 (`packages/svelte/src/compiler/`) | 役割                                                                             |
