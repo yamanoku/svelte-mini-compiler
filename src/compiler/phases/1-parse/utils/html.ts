@@ -6,29 +6,29 @@
 
 /** 終了タグを持たないvoid要素 (https://html.spec.whatwg.org/#void-elements) */
 const VOID_ELEMENT_NAMES = new Set([
-	'area',
-	'base',
-	'br',
-	'col',
-	'embed',
-	'hr',
-	'img',
-	'input',
-	'link',
-	'meta',
-	'param',
-	'source',
-	'track',
-	'wbr'
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
 ]);
 
 export function is_void(name: string): boolean {
-	return VOID_ELEMENT_NAMES.has(name.toLowerCase());
+  return VOID_ELEMENT_NAMES.has(name.toLowerCase());
 }
 
 /** 中身をHTMLとして解析しない要素（本家では <script>/<style> を特別扱いしている） */
 export function is_raw_text_element(name: string): boolean {
-	return name === 'script' || name === 'style' || name === 'textarea';
+  return name === "script" || name === "style" || name === "textarea";
 }
 
 /**
@@ -37,43 +37,43 @@ export function is_raw_text_element(name: string): boolean {
  * 本家の `autoclosing_children` の簡略版。
  */
 const implicitly_closed_by: Record<string, string[]> = {
-	li: ['li'],
-	dt: ['dt', 'dd'],
-	dd: ['dt', 'dd'],
-	p: [
-		'address',
-		'article',
-		'aside',
-		'blockquote',
-		'div',
-		'dl',
-		'fieldset',
-		'footer',
-		'form',
-		'h1',
-		'h2',
-		'h3',
-		'h4',
-		'h5',
-		'h6',
-		'header',
-		'hr',
-		'main',
-		'nav',
-		'ol',
-		'p',
-		'pre',
-		'section',
-		'table',
-		'ul'
-	],
-	optgroup: ['optgroup'],
-	option: ['option', 'optgroup'],
-	thead: ['tbody', 'tfoot'],
-	tbody: ['tfoot'],
-	tr: ['tr'],
-	td: ['td', 'th', 'tr'],
-	th: ['td', 'th', 'tr']
+  li: ["li"],
+  dt: ["dt", "dd"],
+  dd: ["dt", "dd"],
+  p: [
+    "address",
+    "article",
+    "aside",
+    "blockquote",
+    "div",
+    "dl",
+    "fieldset",
+    "footer",
+    "form",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "header",
+    "hr",
+    "main",
+    "nav",
+    "ol",
+    "p",
+    "pre",
+    "section",
+    "table",
+    "ul",
+  ],
+  optgroup: ["optgroup"],
+  option: ["option", "optgroup"],
+  thead: ["tbody", "tfoot"],
+  tbody: ["tfoot"],
+  tr: ["tr"],
+  td: ["td", "th", "tr"],
+  th: ["td", "th", "tr"],
 };
 
 /**
@@ -82,19 +82,19 @@ const implicitly_closed_by: Record<string, string[]> = {
  * `next` が省略された場合は「親の終了タグ or ソースの終端に達した」ことを表す。
  */
 export function closing_tag_omitted(current: string, next?: string): boolean {
-	const closers = implicitly_closed_by[current];
-	if (!closers) return false;
-	return next === undefined || closers.includes(next);
+  const closers = implicitly_closed_by[current];
+  if (!closers) return false;
+  return next === undefined || closers.includes(next);
 }
 
 const named_entities: Record<string, string> = {
-	amp: '&',
-	lt: '<',
-	gt: '>',
-	quot: '"',
-	apos: "'",
-	nbsp: ' ',
-	copy: '©'
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+  copy: "©",
 };
 
 /**
@@ -102,13 +102,13 @@ const named_entities: Record<string, string> = {
  * （本家は全named entityの巨大なテーブルを持つが、ここでは代表的なものだけ）。
  */
 export function decode_character_references(html: string): string {
-	return html.replace(/&(#?[a-zA-Z0-9]+);/g, (match, entity: string) => {
-		if (entity.startsWith('#x') || entity.startsWith('#X')) {
-			return String.fromCodePoint(parseInt(entity.slice(2), 16));
-		}
-		if (entity.startsWith('#')) {
-			return String.fromCodePoint(parseInt(entity.slice(1), 10));
-		}
-		return named_entities[entity] ?? match;
-	});
+  return html.replace(/&(#?[a-zA-Z0-9]+);/g, (match, entity: string) => {
+    if (entity.startsWith("#x") || entity.startsWith("#X")) {
+      return String.fromCodePoint(parseInt(entity.slice(2), 16));
+    }
+    if (entity.startsWith("#")) {
+      return String.fromCodePoint(parseInt(entity.slice(1), 10));
+    }
+    return named_entities[entity] ?? match;
+  });
 }

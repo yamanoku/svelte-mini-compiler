@@ -9,7 +9,7 @@ Svelteのパーサは字句解析と構文解析を分けず、**現在位置 `i
 ```ts
 let state: ParserState = fragment;
 while (this.index < this.template.length) {
-	state = state(this) ?? fragment;
+  state = state(this) ?? fragment;
 }
 ```
 
@@ -21,8 +21,8 @@ while (this.index < this.template.length) {
 
 ```ts
 const name = parser.read(regex_attribute_name);
-if (parser.eat('=')) {
-	value = read_attribute_value(parser);
+if (parser.eat("=")) {
+  value = read_attribute_value(parser);
 }
 ```
 
