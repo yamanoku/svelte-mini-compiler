@@ -16,7 +16,11 @@ import type { Analysis, CompileOptions, Fragment, Root } from "../../types.ts";
 
 /** filename（例: "App.svelte"）から生成するコンポーネント関数名を導出する。本家と同じ発想 */
 function component_name_from_filename(filename: string | undefined): string {
-  const base = filename?.split("/").pop()?.replace(/\.svelte$/, "") ?? "";
+  const base =
+    filename
+      ?.split("/")
+      .pop()
+      ?.replace(/\.svelte$/, "") ?? "";
   return /^[A-Za-z_$][\w$]*$/.test(base) ? base : "Component";
 }
 
