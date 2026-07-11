@@ -46,6 +46,7 @@ export class Parser {
       end: template.length,
       fragment: { type: "Fragment", nodes: [] },
       instance: null,
+      css: null,
     };
 
     this.stack.push(this.root);

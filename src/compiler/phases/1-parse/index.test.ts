@@ -106,6 +106,36 @@ test("<script> を2つ書くとエラーになる", () => {
   assert.throws(() => parse("<script>a</script><script>b</script>"), CompileError);
 });
 
+test("<style> の中身はHTMLとして解析されない", () => {
+  const ast = parse('<div><style>p::before { content: "<div>"; }</style></div>');
+
+  const div = ast.fragment.nodes[0] as RegularElement;
+  const style = div.fragment.nodes[0] as RegularElement;
+  assert.equal(style.name, "style");
+  assert.equal(style.fragment.nodes.length, 1);
+  assert.equal(
+    (style.fragment.nodes[0] as Text).raw,
+    'p::before { content: "<div>"; }',
+  );
+});
+
+test("ルート直下の <style> は Root.css になり、fragment には現れない", () => {
+  const ast = parse("<style>\n\tp { color: red; }\n</style>\n<main></main>");
+
+  assert.ok(ast.css);
+  assert.equal(ast.css.type, "Style");
+  assert.match(ast.css.content, /p \{ color: red; \}/);
+
+  const names = ast.fragment.nodes
+    .filter((node) => node.type === "RegularElement")
+    .map((node) => node.name);
+  assert.deepEqual(names, ["main"]);
+});
+
+test("<style> を2つ書くとエラーになる", () => {
+  assert.throws(() => parse("<style>a{}</style><style>b{}</style>"), CompileError);
+});
+
 test("大文字始まりのタグは Component ノードになる", () => {
   const ast = parse("<div><Profile /></div><Card></Card>");
 

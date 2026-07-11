@@ -5,7 +5,7 @@
  *
  *   1. parse     — ソース文字列 → AST
  *   2. analyze   — AST → 解析結果（統計・警告・import情報）
- *   3. transform — AST + 解析結果 → JSコード
+ *   3. transform — AST + 解析結果 → JSコード / CSSコード
  *
  * 本家と同じく `compile(source, options)` で filename を受け取り、
  * 生成するコンポーネント関数名の導出に使う。
@@ -18,9 +18,9 @@ import { transform } from "./phases/3-transform/index.ts";
 export function compile(source: string, options: CompileOptions = {}): CompileResult {
   const ast = parse(source);
   const analysis = analyze(ast, source);
-  const js = transform(ast, analysis, options);
+  const { js, css } = transform(ast, analysis, options);
 
-  return { ast, analysis, js };
+  return { ast, analysis, js, css };
 }
 
 export { parse, analyze, transform };

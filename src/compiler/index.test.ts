@@ -52,3 +52,15 @@ test("filename 未指定のときのコンポーネント関数名は Component 
   const result = compile("<p>hi</p>");
   assert.match(result.js.code, /export default function Component\(target\) \{/);
 });
+
+test("ルート直下の <style> は css.code として出力され、js.code には現れない", () => {
+  const result = compile("<style>\n\tp { color: red; }\n</style>\n<p>hi</p>");
+
+  assert.match(result.css.code, /p \{ color: red; \}/);
+  assert.doesNotMatch(result.js.code, /createElement\("style"\)/);
+});
+
+test("<style> がない場合、css.code は空文字になる", () => {
+  const result = compile("<p>hi</p>");
+  assert.equal(result.css.code, "");
+});
