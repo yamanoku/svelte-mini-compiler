@@ -13,7 +13,7 @@
 import type { CompileOptions, CompileResult } from "./types.ts";
 import { parse } from "./phases/1-parse/index.ts";
 import { analyze } from "./phases/2-analyze/index.ts";
-import { transform } from "./phases/3-transform/index.ts";
+import { svelte_to_js_filename, transform } from "./phases/3-transform/index.ts";
 
 export function compile(source: string, options: CompileOptions = {}): CompileResult {
   const ast = parse(source);
@@ -23,6 +23,6 @@ export function compile(source: string, options: CompileOptions = {}): CompileRe
   return { ast, analysis, js, css };
 }
 
-export { parse, analyze, transform };
+export { parse, analyze, transform, svelte_to_js_filename };
 export { CompileError } from "./errors.ts";
 export type * from "./types.ts";

@@ -41,9 +41,13 @@ export function analyze(ast: Root, source: string): Analysis {
 
   function visit_fragment(fragment: Fragment, depth: number): void {
     for (const node of fragment.nodes) {
+      if (node.type !== "Component" && node.type !== "RegularElement") continue;
+
+      // 要素・コンポーネント共通の統計
+      element_counts[node.name] = (element_counts[node.name] ?? 0) + 1;
+      max_depth = Math.max(max_depth, depth);
+
       if (node.type === "Component") {
-        element_counts[node.name] = (element_counts[node.name] ?? 0) + 1;
-        max_depth = Math.max(max_depth, depth);
         used_components.add(node.name);
 
         // 本家ではスコープ解決の結果 `X is not defined` になるケース
@@ -72,11 +76,6 @@ export function analyze(ast: Root, source: string): Analysis {
         }
         continue;
       }
-
-      if (node.type !== "RegularElement") continue;
-
-      element_counts[node.name] = (element_counts[node.name] ?? 0) + 1;
-      max_depth = Math.max(max_depth, depth);
 
       // 本家の a11y_missing_attribute 警告のミニ版
       if (node.name === "img" && !get_attribute(node, "alt")) {

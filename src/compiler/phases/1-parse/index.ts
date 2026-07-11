@@ -21,8 +21,6 @@ import { closing_tag_omitted } from "./utils/html.ts";
  */
 export type ParserState = (parser: Parser) => ParserState | void;
 
-const regex_whitespace = /^\s+/;
-
 export class Parser {
   readonly template: string;
 
@@ -146,14 +144,6 @@ export class Parser {
     while (this.index < this.template.length && /\s/.test(this.template[this.index])) {
       this.index += 1;
     }
-  }
-
-  /** 空白が必須の場所で使う */
-  require_whitespace(): void {
-    if (!this.match_regex(regex_whitespace)) {
-      this.error("空白が必要です");
-    }
-    this.allow_whitespace();
   }
 
   /** 行・列を算出して位置情報つきのエラーを投げる */
