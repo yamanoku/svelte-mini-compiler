@@ -9,8 +9,6 @@
 
 <style>
 	main {
-		max-width: 40rem;
-		margin: 2rem auto;
-		padding: 0 1rem;
+		margin-inline: auto;
 	}
 </style>
