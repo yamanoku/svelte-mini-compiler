@@ -59,5 +59,8 @@ while (queue.length > 0) {
 
 // 各 .svelte の <style> を結合して1つのCSSファイルに書き出す(本家のようなスコープ処理は行わない)。
 // スタイルが1つもなくても書き出すことで、public/index.html の <link> が404にならないようにする
-await writeFile(join(out_dir, "bundle.css"), css_chunks.length > 0 ? `${css_chunks.join("\n\n")}\n` : "");
+await writeFile(
+  join(out_dir, "bundle.css"),
+  css_chunks.length > 0 ? `${css_chunks.join("\n\n")}\n` : "",
+);
 console.log(`public/bundle.css を出力しました(${css_chunks.length} 件のスタイルを結合)`);

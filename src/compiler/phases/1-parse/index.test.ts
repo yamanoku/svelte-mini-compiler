@@ -113,10 +113,7 @@ test("<style> の中身はHTMLとして解析されない", () => {
   const style = div.fragment.nodes[0] as RegularElement;
   assert.equal(style.name, "style");
   assert.equal(style.fragment.nodes.length, 1);
-  assert.equal(
-    (style.fragment.nodes[0] as Text).raw,
-    'p::before { content: "<div>"; }',
-  );
+  assert.equal((style.fragment.nodes[0] as Text).raw, 'p::before { content: "<div>"; }');
 });
 
 test("ルート直下の <style> は Root.css になり、fragment には現れない", () => {
