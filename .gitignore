@@ -1,5 +1,5 @@
 node_modules/
 dist/
-public/*.js
+public/**/*.js
 public/bundle.css
 .playwright-mcp/

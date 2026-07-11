@@ -1,5 +1,5 @@
 <script>
-	import Profile from "./Profile.svelte";
+	import Profile from "./components/Profile.svelte";
 </script>
 
 <main>

@@ -22,8 +22,8 @@ import { CompileError } from "../../errors.ts";
 /** `import Profile from "./Profile.svelte";` の形にだけマッチする */
 const regex_import = /^import\s+([A-Za-z_$][\w$]*)\s+from\s+(["'])(.+?)\2\s*;?$/;
 
-/** import 元は「同一ディレクトリの .svelte」のみ対応（`../` やサブディレクトリは拒否） */
-const regex_import_source = /^\.\/[A-Za-z_$][\w$]*\.svelte$/;
+/** import 元は「src/ 配下の相対 .svelte パス」のみ対応（`./` から始まる同一階層・サブディレクトリのみ。`../` によるトラバーサルは拒否） */
+const regex_import_source = /^\.\/(?:[A-Za-z0-9_$-]+\/)*[A-Za-z_$][\w$]*\.svelte$/;
 
 export function analyze(ast: Root, source: string): Analysis {
   const element_counts: Record<string, number> = {};
@@ -163,7 +163,7 @@ function extract_imports(ast: Root, source: string): ComponentImport[] {
 
     if (!regex_import_source.test(import_source)) {
       throw new CompileError(
-        `import 元は "./Name.svelte" 形式（同一ディレクトリの .svelte）のみ対応しています`,
+        `import 元は "./Name.svelte" や "./dir/Name.svelte" 形式（"./" から始まる相対 .svelte パス）のみ対応しています`,
         source,
         start,
       );
