@@ -64,14 +64,11 @@ export function analyze(ast: Root, source: string): Analysis {
           );
         }
         const has_content = node.fragment.nodes.some(
-          (child) => !(child.type === "Comment" || (child.type === "Text" && child.data.trim() === "")),
+          (child) =>
+            !(child.type === "Comment" || (child.type === "Text" && child.data.trim() === "")),
         );
         if (has_content) {
-          throw new CompileError(
-            `コンポーネントは子要素（slot）に未対応です`,
-            source,
-            node.start,
-          );
+          throw new CompileError(`コンポーネントは子要素（slot）に未対応です`, source, node.start);
         }
         continue;
       }
