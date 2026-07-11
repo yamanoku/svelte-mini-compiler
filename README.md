@@ -1,6 +1,6 @@
 # svelte-mini-compiler
 
-[sveltejs/svelte](https://github.com/sveltejs/svelte) の `compile()` の仕組みを参考にした、HTML解析のみを行うコンパイラのサンプルです。
+[sveltejs/svelte](https://github.com/sveltejs/svelte) の `compile()` の仕組みを参考にした、HTMLの描画にフォーカスした擬似コンパイラです。
 
 Svelteのコンパイラは **parse → analyze → transform** の3フェーズで構成されています。
 
