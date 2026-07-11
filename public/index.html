@@ -1,18 +1,18 @@
 <!doctype html>
 <html lang="ja">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="icon" href="data:," />
-		<title>svelte-mini-compiler demo</title>
-	</head>
-	<body>
-		<div id="app"></div>
-		<!-- app.js は `pnpm build:app` で src/App.svelte から生成される -->
-		<script type="module">
-			import { render } from "./app.js";
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>svelte-mini-compiler demo</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <!-- app.js は `pnpm build:app` で src/App.svelte から生成される -->
+    <script type="module">
+      import { render } from "./app.js";
 
-			render(document.getElementById("app"));
-		</script>
-	</body>
+      render(document.getElementById("app"));
+    </script>
+  </body>
 </html>
