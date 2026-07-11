@@ -6,24 +6,14 @@
 import { inspect } from "node:util";
 import { compile } from "./compiler/index.ts";
 
-const source = `<script>
+const source = `
+<script>
 	import Profile from "./Profile.svelte";
 </script>
-
-<!-- プロフィールページ -->
-<section class="card" id="page" data-theme='dark'>
-	<h1>yamanoku&#39;s page</h1>
-	<img src="avatar.png">
-	<p>1つ目の段落（終了タグ省略）
-	<p>2つ目の段落 &amp; エンティティ</p>
-	<ul>
-		<li>りんご
-		<li>みかん
-	</ul>
-	<input type="text" disabled>
-	<br />
+<main>
+	<h1>svelte-mini-compiler demo</h1>
 	<Profile />
-</section>
+</main>
 `;
 
 const result = compile(source, { filename: "Demo.svelte" });
