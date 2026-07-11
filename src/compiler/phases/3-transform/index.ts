@@ -11,6 +11,10 @@
  * `.js` への import に書き換えて出力する（本家では vite-plugin-svelte などの
  * バンドラ側が行う解決に相当）。コンポーネントタグは、import した
  * コンポーネント関数の呼び出し `Profile(parent)` になる。
+ *
+ * ルート直下の `<style>`（`Root.css`）はDOM構築コードには含めず、
+ * `css.code` として別出力する（本家の `CompileResult.css` に相当。
+ * スコープ処理はせず、生のCSSをそのまま返すだけのミニ版）。
  */
 import type { Analysis, CompileOptions, Fragment, Root } from "../../types.ts";
 
@@ -28,7 +32,7 @@ export function transform(
   ast: Root,
   analysis: Analysis,
   options: CompileOptions = {},
-): { code: string } {
+): { js: { code: string }; css: { code: string } } {
   const body: string[] = [];
   const counters: Record<string, number> = {};
 
@@ -95,5 +99,5 @@ export function transform(
     "",
   ].join("\n");
 
-  return { code };
+  return { js: { code }, css: { code: ast.css ? ast.css.content.trim() : "" } };
 }

@@ -32,7 +32,7 @@ if (parser.eat("=")) {
 
 - **void要素** (`<br>`, `<img>` …) はスタックに積まない
 - **終了タグの省略**: `<li>りんご<li>みかん` は `closing_tag_omitted()`（本家と同名の関数）の判定で1つ目の `li` を暗黙的に閉じる
-- **`<script>` / `<style>`** の中身はHTMLとして解析せず、終了タグまで生テキストとして読む。**ルート直下の `<script>`** はテンプレートの一部ではなく instance script として `Root.instance` に取り出す（本家の `read_script` に相当）
+- **`<script>` / `<style>`** の中身はHTMLとして解析せず、終了タグまで生テキストとして読む。**ルート直下の `<script>` / `<style>`** はテンプレートの一部ではなく、それぞれ instance script / stylesheet として `Root.instance` / `Root.css` に取り出す（本家の `read_script` / `read_style` に相当）
 - **大文字始まりのタグ**（`<Profile />`）は `RegularElement` ではなく `Component` ノードになる（本家の component 分岐に相当）
 
 すべてのASTノードは `start` / `end` のソースオフセットを持ち、エラーはオフセットから行・列を計算して報告します（本家の `CompileError` と同じ）。
@@ -65,3 +65,4 @@ if (parser.eat("=")) {
 - analyze はスコープ解決やリアクティビティ解析を持たず、統計とa11y警告と import 抽出のミニ版のみ
 - transform はリアクティビティのない素朴な `document.createElement` の羅列を生成（本家はテンプレートのクローンと signal ベースの更新コードを生成する）
 - 文字参照テーブルは代表的なもののみ（本家は全named entityを持つ）
+- `<style>` はスコープ処理（セレクタへのハッシュ付与）をせず、`Root.css` の生のCSSをそのまま `css.code` として返すのみ。build（`src/build.ts`）は各 `.svelte` の `css.code` を単純に連結して `public/bundle.css` に書き出す（本家はコンポーネントごとにスコープされたCSSを1つのスタイルシートにまとめる）

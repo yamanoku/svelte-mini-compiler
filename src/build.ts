@@ -20,6 +20,7 @@ await mkdir(out_dir, { recursive: true });
 // seen により同じファイルは一度だけコンパイルする（循環 import でも停止する）
 const queue = ["App.svelte"];
 const seen = new Set<string>();
+const css_chunks: string[] = [];
 
 while (queue.length > 0) {
   const filename = queue.shift()!;
@@ -46,8 +47,20 @@ while (queue.length > 0) {
   await writeFile(join(out_dir, out_name), result.js.code);
   console.log(`src/${filename} -> public/${out_name} を出力しました`);
 
+  if (result.css.code) {
+    css_chunks.push(`/* ${filename} */\n${result.css.code}`);
+  }
+
   for (const imported of result.analysis.imports) {
     // analyze が "./Name.svelte" 形式を保証しているので "./" を剥がすだけでよい
     queue.push(imported.source.slice(2));
   }
 }
+
+// 各 .svelte の <style> を結合して1つのCSSファイルに書き出す(本家のようなスコープ処理は行わない)。
+// スタイルが1つもなくても書き出すことで、public/index.html の <link> が404にならないようにする
+await writeFile(
+  join(out_dir, "bundle.css"),
+  css_chunks.length > 0 ? `${css_chunks.join("\n\n")}\n` : "",
+);
+console.log(`public/bundle.css を出力しました(${css_chunks.length} 件のスタイルを結合)`);

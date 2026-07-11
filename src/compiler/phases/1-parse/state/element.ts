@@ -115,13 +115,21 @@ export function element(parser: Parser): void {
     parser.eat(">", true);
     element.end = parser.index;
 
-    // ルート直下の <script> はテンプレートの一部ではなく instance script として
-    // Root.instance に取り出す（本家が read_script で Root.instance を作るのに相当）
-    if (name === "script" && parser.current().type === "Root") {
-      if (parser.root.instance) {
-        parser.error("<script> はコンポーネントに1つだけ書けます", start);
+    // ルート直下の <script> / <style> はテンプレートの一部ではなく、それぞれ
+    // instance script / stylesheet として Root.instance / Root.css に取り出す
+    // （本家が read_script / read_style で Root.instance / Root.css を作るのに相当）
+    if ((name === "script" || name === "style") && parser.current().type === "Root") {
+      if (name === "script") {
+        if (parser.root.instance) {
+          parser.error("<script> はコンポーネントに1つだけ書けます", start);
+        }
+        parser.root.instance = { type: "Script", start, end: parser.index, content: data };
+      } else {
+        if (parser.root.css) {
+          parser.error("<style> はコンポーネントに1つだけ書けます", start);
+        }
+        parser.root.css = { type: "Style", start, end: parser.index, content: data };
       }
-      parser.root.instance = { type: "Script", start, end: parser.index, content: data };
       return;
     }
 

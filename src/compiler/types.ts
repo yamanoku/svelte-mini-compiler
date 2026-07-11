@@ -24,12 +24,21 @@ export interface Script extends BaseNode {
   content: string;
 }
 
+/** ルート直下の `<style>`。本家の `AST.Root.css`（スタイルシート）に相当。
+ * 本家はCSSのAST（postcss-safe-parserベース）を持つが、ここでは生のソース文字列のみ保持する */
+export interface Style extends BaseNode {
+  type: "Style";
+  content: string;
+}
+
 /** ASTのルート。本家の `AST.Root` に相当 */
 export interface Root extends BaseNode {
   type: "Root";
   fragment: Fragment;
   /** ルート直下の `<script>`（なければ null）。本家の instance script に相当 */
   instance: Script | null;
+  /** ルート直下の `<style>`（なければ null） */
+  css: Style | null;
 }
 
 export interface Text extends BaseNode {
@@ -110,6 +119,9 @@ export interface CompileResult {
   ast: Root;
   analysis: Analysis;
   js: {
+    code: string;
+  };
+  css: {
     code: string;
   };
 }
