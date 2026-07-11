@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type { RegularElement, Text } from "../../types.ts";
+import type { Component, RegularElement, Text } from "../../types.ts";
 import { CompileError } from "../../errors.ts";
 import { parse } from "./index.ts";
 
@@ -78,12 +78,51 @@ test("文字参照をデコードする（rawには元の文字列が残る）",
 });
 
 test("<script> の中身はHTMLとして解析されない", () => {
-  const ast = parse('<script>if (a < b) console.log("<div>");</script>');
+  const ast = parse('<div><script>if (a < b) console.log("<div>");</script></div>');
 
-  const script = ast.fragment.nodes[0] as RegularElement;
+  const div = ast.fragment.nodes[0] as RegularElement;
+  const script = div.fragment.nodes[0] as RegularElement;
   assert.equal(script.name, "script");
   assert.equal(script.fragment.nodes.length, 1);
   assert.equal((script.fragment.nodes[0] as Text).raw, 'if (a < b) console.log("<div>");');
+});
+
+test("ルート直下の <script> は Root.instance になり、fragment には現れない", () => {
+  const ast = parse('<script>\n\timport Profile from "./Profile.svelte";\n</script>\n<main></main>');
+
+  assert.ok(ast.instance);
+  assert.equal(ast.instance.type, "Script");
+  assert.match(ast.instance.content, /import Profile from "\.\/Profile\.svelte";/);
+
+  const names = ast.fragment.nodes
+    .filter((node) => node.type === "RegularElement")
+    .map((node) => node.name);
+  assert.deepEqual(names, ["main"]);
+});
+
+test("<script> を2つ書くとエラーになる", () => {
+  assert.throws(
+    () => parse("<script>a</script><script>b</script>"),
+    CompileError,
+  );
+});
+
+test("大文字始まりのタグは Component ノードになる", () => {
+  const ast = parse("<div><Profile /></div><Card></Card>");
+
+  const div = ast.fragment.nodes[0] as RegularElement;
+  const profile = div.fragment.nodes[0] as Component;
+  assert.equal(profile.type, "Component");
+  assert.equal(profile.name, "Profile");
+  assert.equal(profile.fragment.nodes.length, 0);
+
+  const card = ast.fragment.nodes[1] as Component;
+  assert.equal(card.type, "Component");
+  assert.equal(card.name, "Card");
+});
+
+test("JS識別子として不正なコンポーネント名はエラーになる", () => {
+  assert.throws(() => parse("<Foo-Bar />"), CompileError);
 });
 
 test("閉じられていない要素は位置情報つきのエラーになる", () => {

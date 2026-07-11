@@ -8,11 +8,11 @@
   </head>
   <body>
     <div id="app"></div>
-    <!-- app.js は `pnpm build:app` で src/App.svelte から生成される -->
+    <!-- App.js / Profile.js は `pnpm build:app` で src/*.svelte から生成される -->
     <script type="module">
-      import { render } from "./app.js";
+      import App from "./App.js";
 
-      render(document.getElementById("app"));
+      App(document.getElementById("app"));
     </script>
   </body>
 </html>

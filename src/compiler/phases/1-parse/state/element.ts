@@ -5,7 +5,7 @@
  * `<` を読んだ直後に呼ばれ、コメント / doctype / 終了タグ / 開始タグを判別し、
  * 開始タグなら属性を読み取って要素ノードを組み立てる。
  */
-import type { Attribute, RegularElement } from "../../../types.ts";
+import type { Attribute, Component, RegularElement } from "../../../types.ts";
 import type { Parser } from "../index.ts";
 import {
   closing_tag_omitted,
@@ -17,6 +17,9 @@ import {
 const regex_element_name = /^[a-zA-Z][a-zA-Z0-9-]*/;
 const regex_attribute_name = /^[^\s=/>"']+/;
 const regex_unquoted_attribute_value = /^[^\s>]+/;
+
+/** コンポーネント名はJSの識別子として妥当である必要がある（生成コードで関数呼び出しになるため） */
+const regex_component_name = /^[A-Z][A-Za-z0-9_$]*$/;
 
 export function element(parser: Parser): void {
   const start = parser.index;
@@ -50,6 +53,12 @@ export function element(parser: Parser): void {
   const name = parser.read(regex_element_name);
   if (!name) parser.error("要素名が必要です");
 
+  // 大文字始まりのタグはコンポーネント（本家 element.js の component 分岐に相当）
+  const is_component = /^[A-Z]/.test(name);
+  if (is_component && !regex_component_name.test(name)) {
+    parser.error(`コンポーネント名 <${name}> に使えるのは英数字・_・$ のみです`, start);
+  }
+
   // 終了タグの省略: 開いている要素がこのタグの出現で暗黙的に閉じられるケース
   // （例: <li>りんご<li> → 1つ目の li をここで閉じる）
   const parent = parser.current();
@@ -58,14 +67,23 @@ export function element(parser: Parser): void {
     parser.pop();
   }
 
-  const element: RegularElement = {
-    type: "RegularElement",
-    start,
-    end: -1, // タグを閉じたときに確定する
-    name,
-    attributes: [],
-    fragment: { type: "Fragment", nodes: [] },
-  };
+  const element: RegularElement | Component = is_component
+    ? {
+        type: "Component",
+        start,
+        end: -1, // タグを閉じたときに確定する
+        name,
+        attributes: [],
+        fragment: { type: "Fragment", nodes: [] },
+      }
+    : {
+        type: "RegularElement",
+        start,
+        end: -1,
+        name,
+        attributes: [],
+        fragment: { type: "Fragment", nodes: [] },
+      };
 
   // 属性の読み取り。`>` か `/` が来るまで繰り返す
   parser.allow_whitespace();
@@ -81,7 +99,7 @@ export function element(parser: Parser): void {
   parser.eat(">", true);
 
   // 自己終了タグ・void要素は子を持たないのでスタックに積まない
-  if (self_closing || is_void(name)) {
+  if (self_closing || (!is_component && is_void(name))) {
     element.end = parser.index;
     parser.append(element);
     return;
@@ -89,20 +107,31 @@ export function element(parser: Parser): void {
 
   // <script> / <style> / <textarea> の中身はHTMLとして解析せず、
   // 対応する終了タグまでを1つのテキストノードとして読む（本家と同じ特別扱い）
-  if (is_raw_text_element(name)) {
+  if (!is_component && is_raw_text_element(name)) {
     const data_start = parser.index;
     const data = parser.read_until(new RegExp(`</${name}\\s*>`, "i"));
-    element.fragment.nodes.push({
-      type: "Text",
-      start: data_start,
-      end: parser.index,
-      raw: data,
-      data,
-    });
     parser.eat(`</${name}`, true, `</${name}> が必要です`);
     parser.allow_whitespace();
     parser.eat(">", true);
     element.end = parser.index;
+
+    // ルート直下の <script> はテンプレートの一部ではなく instance script として
+    // Root.instance に取り出す（本家が read_script で Root.instance を作るのに相当）
+    if (name === "script" && parser.current().type === "Root") {
+      if (parser.root.instance) {
+        parser.error("<script> はコンポーネントに1つだけ書けます", start);
+      }
+      parser.root.instance = { type: "Script", start, end: parser.index, content: data };
+      return;
+    }
+
+    element.fragment.nodes.push({
+      type: "Text",
+      start: data_start,
+      end: data_start + data.length,
+      raw: data,
+      data,
+    });
     parser.append(element);
     return;
   }

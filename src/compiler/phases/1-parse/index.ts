@@ -10,7 +10,7 @@
  * - `fragment` → `element` / `text` という状態関数を遷移させるステートマシン
  * - `eat` / `match` / `read` / `read_until` などの小さなヘルパー群
  */
-import type { Fragment, RegularElement, Root, TemplateNode } from "../../types.ts";
+import type { Component, Fragment, RegularElement, Root, TemplateNode } from "../../types.ts";
 import { CompileError } from "../../errors.ts";
 import { fragment } from "./state/fragment.ts";
 import { closing_tag_omitted } from "./utils/html.ts";
@@ -32,7 +32,7 @@ export class Parser {
   root: Root;
 
   /** まだ閉じられていない要素のスタック。先頭は常に Root */
-  stack: Array<Root | RegularElement> = [];
+  stack: Array<Root | RegularElement | Component> = [];
 
   /** stack と対になる、子ノードの追加先 Fragment のスタック */
   fragments: Fragment[] = [];
@@ -45,6 +45,7 @@ export class Parser {
       start: 0,
       end: template.length,
       fragment: { type: "Fragment", nodes: [] },
+      instance: null,
     };
 
     this.stack.push(this.root);
@@ -61,7 +62,7 @@ export class Parser {
     // ソース終端に達した時点で閉じられていない要素の処理。
     // 終了タグの省略が許される要素（li, p など）は暗黙的に閉じ、それ以外はエラー
     while (this.stack.length > 1) {
-      const element = this.current() as RegularElement;
+      const element = this.current() as RegularElement | Component;
       if (!closing_tag_omitted(element.name)) {
         this.error(`<${element.name}> が閉じられていません`, element.start);
       }
@@ -71,7 +72,7 @@ export class Parser {
   }
 
   /** 現在開いている（＝スタックの先頭の）要素 */
-  current(): Root | RegularElement {
+  current(): Root | RegularElement | Component {
     return this.stack[this.stack.length - 1];
   }
 
@@ -81,7 +82,7 @@ export class Parser {
   }
 
   /** 要素を開く: スタックに積み、以降の子はこの要素のFragmentに入る */
-  push(element: RegularElement): void {
+  push(element: RegularElement | Component): void {
     this.append(element);
     this.stack.push(element);
     this.fragments.push(element.fragment);

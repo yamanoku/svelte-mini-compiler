@@ -17,10 +17,19 @@ export interface Fragment {
   nodes: TemplateNode[];
 }
 
+/** ルート直下の `<script>`。本家の `AST.Root.instance`（instance script）に相当。
+ * 本家はJSのAST（estree）を持つが、ここでは生のソース文字列のみ保持する */
+export interface Script extends BaseNode {
+  type: "Script";
+  content: string;
+}
+
 /** ASTのルート。本家の `AST.Root` に相当 */
 export interface Root extends BaseNode {
   type: "Root";
   fragment: Fragment;
+  /** ルート直下の `<script>`（なければ null）。本家の instance script に相当 */
+  instance: Script | null;
 }
 
 export interface Text extends BaseNode {
@@ -52,7 +61,15 @@ export interface RegularElement extends BaseNode {
   fragment: Fragment;
 }
 
-export type TemplateNode = Text | Comment | RegularElement;
+/** 大文字始まりのタグ（`<Profile />` など）。本家の `AST.Component` に相当 */
+export interface Component extends BaseNode {
+  type: "Component";
+  name: string;
+  attributes: Attribute[];
+  fragment: Fragment;
+}
+
+export type TemplateNode = Text | Comment | RegularElement | Component;
 
 /** 2-analyze フェーズの出力 */
 export interface Warning {
@@ -62,12 +79,30 @@ export interface Warning {
   end: number;
 }
 
+/** instance script から抽出した `.svelte` の import 情報 */
+export interface ComponentImport {
+  /** import されるコンポーネント名（例: "Profile"） */
+  name: string;
+  /** import 元のパス（例: "./Profile.svelte"） */
+  source: string;
+  start: number;
+  end: number;
+}
+
 export interface Analysis {
-  /** 要素名ごとの出現数 */
+  /** 要素名・コンポーネント名ごとの出現数 */
   element_counts: Record<string, number>;
   /** 要素の最大ネスト深さ */
   max_depth: number;
   warnings: Warning[];
+  /** instance script から抽出した import の一覧 */
+  imports: ComponentImport[];
+}
+
+/** compile() のオプション。本家の `CompileOptions` のミニ版 */
+export interface CompileOptions {
+  /** コンポーネント関数名の元になるファイル名（例: "App.svelte"）。本家の options.filename に相当 */
+  filename?: string;
 }
 
 /** compile() の戻り値。本家の `CompileResult`（js/css/warnings/ast）のミニ版 */

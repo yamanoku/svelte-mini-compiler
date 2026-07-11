@@ -5,11 +5,26 @@
  * 本家はASTからクライアント用のJSモジュール（テンプレートのクローンと
  * リアクティブな更新処理）を生成する。ここではそのミニ版として、
  * ASTをDOM構築コード（document.createElement の羅列）に変換した
- * `render(target)` 関数を持つJSモジュール文字列を生成する。
+ * コンポーネント関数を default export するJSモジュール文字列を生成する。
+ *
+ * instance script から抽出された `.svelte` の import は、コンパイル済みの
+ * `.js` への import に書き換えて出力する（本家では vite-plugin-svelte などの
+ * バンドラ側が行う解決に相当）。コンポーネントタグは、import した
+ * コンポーネント関数の呼び出し `Profile(parent)` になる。
  */
-import type { Analysis, Fragment, Root } from "../../types.ts";
+import type { Analysis, CompileOptions, Fragment, Root } from "../../types.ts";
 
-export function transform(ast: Root, analysis: Analysis): { code: string } {
+/** filename（例: "App.svelte"）から生成するコンポーネント関数名を導出する。本家と同じ発想 */
+function component_name_from_filename(filename: string | undefined): string {
+  const base = filename?.split("/").pop()?.replace(/\.svelte$/, "") ?? "";
+  return /^[A-Za-z_$][\w$]*$/.test(base) ? base : "Component";
+}
+
+export function transform(
+  ast: Root,
+  analysis: Analysis,
+  options: CompileOptions = {},
+): { code: string } {
   const body: string[] = [];
   const counters: Record<string, number> = {};
 
@@ -35,6 +50,12 @@ export function transform(ast: Root, analysis: Analysis): { code: string } {
         continue;
       }
 
+      // コンポーネントは import されたコンポーネント関数の呼び出しになる
+      if (node.type === "Component") {
+        body.push(`${indent}${node.name}(${parent_name});`);
+        continue;
+      }
+
       const name = generate_name(node.name);
       body.push(`${indent}const ${name} = document.createElement(${JSON.stringify(node.name)});`);
 
@@ -53,10 +74,18 @@ export function transform(ast: Root, analysis: Analysis): { code: string } {
   visit_fragment(ast.fragment, "target", "\t");
 
   const total = Object.values(analysis.element_counts).reduce((a, b) => a + b, 0);
+  const component_name = component_name_from_filename(options.filename);
+
+  // `./Profile.svelte` → `./Profile.js` に書き換えた import 行
+  const import_lines = analysis.imports.map(
+    (imported) =>
+      `import ${imported.name} from ${JSON.stringify(imported.source.replace(/\.svelte$/, ".js"))};`,
+  );
 
   const code = [
     `// このコードは svelte-mini-compiler によって生成されました（要素数: ${total}）`,
-    "export function render(target) {",
+    ...(import_lines.length > 0 ? [...import_lines, ""] : []),
+    `export default function ${component_name}(target) {`,
     ...body,
     "}",
     "",
