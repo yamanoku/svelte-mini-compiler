@@ -1,6 +1,6 @@
 <!-- プロフィールカードコンポーネント -->
-<section class="card" id="profile" data-theme='dark'>
-	<h1>yamanoku&#39;s page</h1>
+<section>
+	<h2>yamanoku's page</h2>
 	<img src="avatar.svg">
 	<p>1つ目の段落（終了タグ省略）
 	<p>2つ目の段落 &amp; エンティティ</p>
@@ -8,6 +8,4 @@
 		<li>りんご
 		<li>みかん
 	</ul>
-	<input type="text" disabled>
-	<br />
 </section>

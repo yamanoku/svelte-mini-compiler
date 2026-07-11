@@ -3,6 +3,6 @@
 </script>
 
 <main>
-	<h1>svelte-mini-compiler</h1>
+	<h1>svelte-mini-compiler demo</h1>
 	<Profile />
 </main>
