@@ -97,17 +97,24 @@ const named_entities: Record<string, string> = {
   copy: "©",
 };
 
+/** コードポイントとして妥当なら対応する文字を、そうでなければ null を返す */
+function code_point_to_string(code: number): string | null {
+  if (Number.isNaN(code) || code < 0 || code > 0x10ffff) return null;
+  return String.fromCodePoint(code);
+}
+
 /**
  * 文字参照のデコード。本家の `decode_character_references` のミニ版
  * （本家は全named entityの巨大なテーブルを持つが、ここでは代表的なものだけ）。
+ * デコードできない文字参照は原文のまま残す。
  */
 export function decode_character_references(html: string): string {
   return html.replace(/&(#?[a-zA-Z0-9]+);/g, (match, entity: string) => {
     if (entity.startsWith("#x") || entity.startsWith("#X")) {
-      return String.fromCodePoint(parseInt(entity.slice(2), 16));
+      return code_point_to_string(parseInt(entity.slice(2), 16)) ?? match;
     }
     if (entity.startsWith("#")) {
-      return String.fromCodePoint(parseInt(entity.slice(1), 10));
+      return code_point_to_string(parseInt(entity.slice(1), 10)) ?? match;
     }
     return named_entities[entity] ?? match;
   });

@@ -18,6 +18,11 @@
  */
 import type { Analysis, CompileOptions, Fragment, Root } from "../../types.ts";
 
+/** `.svelte` のファイル名（例: "App.svelte"）をコンパイル後の `.js` のファイル名に変換する */
+export function svelte_to_js_filename(filename: string): string {
+  return filename.replace(/\.svelte$/, ".js");
+}
+
 /** filename（例: "App.svelte"）から生成するコンポーネント関数名を導出する。本家と同じ発想 */
 function component_name_from_filename(filename: string | undefined): string {
   const base =
@@ -48,12 +53,15 @@ export function transform(
       if (node.type === "Comment") continue;
 
       if (node.type === "Text") {
-        // 要素間のインデント等、空白のみのテキストは出力しない
-        if (node.data.trim() === "") continue;
+        // 空白のみのテキストのうち、改行を含むもの（要素間のインデント等）は出力せず、
+        // 改行を含まないもの（インライン要素間の区切りスペース）は半角スペース1つに畳んで出力する
+        let data = node.data;
+        if (data.trim() === "") {
+          if (data.includes("\n")) continue;
+          data = " ";
+        }
         const name = generate_name("text");
-        body.push(
-          `${indent}const ${name} = document.createTextNode(${JSON.stringify(node.data)});`,
-        );
+        body.push(`${indent}const ${name} = document.createTextNode(${JSON.stringify(data)});`);
         body.push(`${indent}${parent_name}.appendChild(${name});`);
         continue;
       }
@@ -87,7 +95,7 @@ export function transform(
   // `./Profile.svelte` → `./Profile.js` に書き換えた import 行
   const import_lines = analysis.imports.map(
     (imported) =>
-      `import ${imported.name} from ${JSON.stringify(imported.source.replace(/\.svelte$/, ".js"))};`,
+      `import ${imported.name} from ${JSON.stringify(svelte_to_js_filename(imported.source))};`,
   );
 
   const code = [

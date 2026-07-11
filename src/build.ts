@@ -9,7 +9,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { compile } from "./compiler/index.ts";
+import { compile, svelte_to_js_filename } from "./compiler/index.ts";
 
 const src_dir = fileURLToPath(new URL("./", import.meta.url));
 const out_dir = fileURLToPath(new URL("../public/", import.meta.url));
@@ -43,7 +43,7 @@ while (queue.length > 0) {
     );
   }
 
-  const out_name = filename.replace(/\.svelte$/, ".js");
+  const out_name = svelte_to_js_filename(filename);
   await writeFile(join(out_dir, out_name), result.js.code);
   console.log(`src/${filename} -> public/${out_name} を出力しました`);
 

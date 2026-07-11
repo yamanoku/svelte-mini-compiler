@@ -16,7 +16,8 @@ import {
 
 const regex_element_name = /^[a-zA-Z][a-zA-Z0-9-]*/;
 const regex_attribute_name = /^[^\s=/>"']+/;
-const regex_unquoted_attribute_value = /^[^\s>]+/;
+// `/` 自体は値に含められる（例: href=/foo/bar）が、`/>` は自己終了タグの開始として終端する
+const regex_unquoted_attribute_value = /^(?:[^\s>/]|\/(?!>))+/;
 
 /** コンポーネント名はJSの識別子として妥当である必要がある（生成コードで関数呼び出しになるため） */
 const regex_component_name = /^[A-Z][A-Za-z0-9_$]*$/;
@@ -46,6 +47,12 @@ export function element(parser: Parser): void {
     if (!name) parser.error("終了タグの要素名が必要です");
     parser.allow_whitespace();
     parser.eat(">", true);
+
+    // void要素は終了タグを持たないので、明示的に書かれていたら専用のエラーにする
+    if (is_void(name)) {
+      parser.error(`</${name}> は不要です。void要素 <${name}> は終了タグを持ちません`, start);
+    }
+
     close_element(parser, name, start);
     return;
   }
@@ -67,23 +74,14 @@ export function element(parser: Parser): void {
     parser.pop();
   }
 
-  const element: RegularElement | Component = is_component
-    ? {
-        type: "Component",
-        start,
-        end: -1, // タグを閉じたときに確定する
-        name,
-        attributes: [],
-        fragment: { type: "Fragment", nodes: [] },
-      }
-    : {
-        type: "RegularElement",
-        start,
-        end: -1,
-        name,
-        attributes: [],
-        fragment: { type: "Fragment", nodes: [] },
-      };
+  const element: RegularElement | Component = {
+    type: is_component ? ("Component" as const) : ("RegularElement" as const),
+    start,
+    end: -1, // タグを閉じたときに確定する
+    name,
+    attributes: [],
+    fragment: { type: "Fragment", nodes: [] },
+  };
 
   // 属性の読み取り。`>` か `/` が来るまで繰り返す
   parser.allow_whitespace();
@@ -110,9 +108,10 @@ export function element(parser: Parser): void {
   if (!is_component && is_raw_text_element(name)) {
     const data_start = parser.index;
     const data = parser.read_until(new RegExp(`</${name}\\s*>`, "i"));
-    parser.eat(`</${name}`, true, `</${name}> が必要です`);
-    parser.allow_whitespace();
-    parser.eat(">", true);
+    // 終了タグも read_until と同じく大文字小文字を無視して消費する
+    if (!parser.read(new RegExp(`^</${name}\\s*>`, "i"))) {
+      parser.error(`</${name}> が必要です`);
+    }
     element.end = parser.index;
 
     // ルート直下の <script> / <style> はテンプレートの一部ではなく、それぞれ
