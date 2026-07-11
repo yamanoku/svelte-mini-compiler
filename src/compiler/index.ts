@@ -4,18 +4,21 @@
  * 3つのフェーズを順番に実行するだけの薄い関数:
  *
  *   1. parse     — ソース文字列 → AST
- *   2. analyze   — AST → 解析結果（統計・警告）
+ *   2. analyze   — AST → 解析結果（統計・警告・import情報）
  *   3. transform — AST + 解析結果 → JSコード
+ *
+ * 本家と同じく `compile(source, options)` で filename を受け取り、
+ * 生成するコンポーネント関数名の導出に使う。
  */
-import type { CompileResult } from "./types.ts";
+import type { CompileOptions, CompileResult } from "./types.ts";
 import { parse } from "./phases/1-parse/index.ts";
 import { analyze } from "./phases/2-analyze/index.ts";
 import { transform } from "./phases/3-transform/index.ts";
 
-export function compile(source: string): CompileResult {
+export function compile(source: string, options: CompileOptions = {}): CompileResult {
   const ast = parse(source);
-  const analysis = analyze(ast);
-  const js = transform(ast, analysis);
+  const analysis = analyze(ast, source);
+  const js = transform(ast, analysis, options);
 
   return { ast, analysis, js };
 }

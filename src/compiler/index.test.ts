@@ -25,3 +25,30 @@ test("id の重複は警告になる", () => {
   const result = compile('<div id="a"></div><p id="a"></p>');
   assert.equal(result.analysis.warnings[0].code, "duplicate_id");
 });
+
+test(".svelte の import はコンポーネント呼び出しつきのJSモジュールにコンパイルされる", () => {
+  const source = [
+    "<script>",
+    '\timport Profile from "./Profile.svelte";',
+    "</script>",
+    "",
+    "<main>",
+    "\t<Profile />",
+    "</main>",
+    "",
+  ].join("\n");
+
+  const result = compile(source, { filename: "App.svelte" });
+
+  // import は .svelte → .js に書き換えられる
+  assert.match(result.js.code, /^import Profile from "\.\/Profile\.js";$/m);
+  // コンポーネント関数は filename 由来の名前で default export される
+  assert.match(result.js.code, /export default function App\(target\) \{/);
+  // コンポーネントタグは関数呼び出しになる
+  assert.match(result.js.code, /Profile\(main_1\);/);
+});
+
+test("filename 未指定のときのコンポーネント関数名は Component になる", () => {
+  const result = compile("<p>hi</p>");
+  assert.match(result.js.code, /export default function Component\(target\) \{/);
+});
