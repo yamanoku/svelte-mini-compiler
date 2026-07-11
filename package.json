@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "demo": "node src/main.ts",
+    "build:app": "node src/build.ts",
+    "serve": "node src/build.ts && node src/serve.ts",
     "test": "node --test 'src/**/*.test.ts'",
     "build": "tsc",
     "check": "tsc --noEmit"
