@@ -1,7 +1,7 @@
 /**
  * デモ: サンプルHTMLをコンパイルして各フェーズの出力を表示する。
  *
- *   node src/main.ts
+ *   node src/demo.ts
  */
 import { inspect } from "node:util";
 import { compile } from "./compiler/index.ts";

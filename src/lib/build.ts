@@ -4,15 +4,15 @@
  * 本家で言うと vite-plugin-svelte が `.svelte` ごとに compile() を呼び、
  * バンドラが import を解決してモジュールグラフを組む部分のミニ版。
  *
- *   node src/build.ts
+ *   node src/lib/build.ts
  */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { compile, svelte_to_js_filename } from "./compiler/index.ts";
+import { compile, svelte_to_js_filename } from "../compiler/index.ts";
 
-const src_dir = fileURLToPath(new URL("./", import.meta.url));
-const out_dir = fileURLToPath(new URL("../public/", import.meta.url));
+const src_dir = fileURLToPath(new URL("../", import.meta.url));
+const out_dir = fileURLToPath(new URL("../../public/", import.meta.url));
 
 await mkdir(out_dir, { recursive: true });
 
@@ -44,7 +44,9 @@ while (queue.length > 0) {
   }
 
   const out_name = svelte_to_js_filename(filename);
-  await writeFile(join(out_dir, out_name), result.js.code);
+  const out_path = join(out_dir, out_name);
+  await mkdir(dirname(out_path), { recursive: true });
+  await writeFile(out_path, result.js.code);
   console.log(`src/${filename} -> public/${out_name} を出力しました`);
 
   if (result.css.code) {
@@ -52,7 +54,7 @@ while (queue.length > 0) {
   }
 
   for (const imported of result.analysis.imports) {
-    // analyze が "./Name.svelte" 形式を保証しているので "./" を剥がすだけでよい
+    // analyze が "./" から始まる相対パスであることを保証しているので "./" を剥がすだけでよい
     queue.push(imported.source.slice(2));
   }
 }

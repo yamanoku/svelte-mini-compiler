@@ -22,8 +22,8 @@ pnpm serve
 # -> http://localhost:3000 を開く
 ```
 
-1. `src/build.ts` がエントリの `src/App.svelte` から import グラフをたどり、各 `.svelte` を `compile()` でJSモジュール（コンポーネント関数を default export）に変換して `public/App.js` / `public/Profile.js` に書き出す（本家で言う vite-plugin-svelte + バンドラのミニ版。analyze フェーズの警告もここで表示される）
-2. `src/serve.ts`（`node:http` 製の最小静的サーバー）が `public/` を配信する
+1. `src/lib/build.ts` がエントリの `src/App.svelte` から import グラフをたどり、各 `.svelte` を `compile()` でJSモジュール（コンポーネント関数を default export）に変換して `public/App.js` / `public/Profile.js` に書き出す（本家で言う vite-plugin-svelte + バンドラのミニ版。analyze フェーズの警告もここで表示される）
+2. `src/lib/serve.ts`（`node:http` 製の最小静的サーバー）が `public/` を配信する
 3. `public/index.html` が `<script type="module">` で `./App.js` を import し、`App(document.getElementById("app"))` を呼んでDOMを構築する。`App.js` は `./Profile.js` を import してコンポーネントを合成する
 
 `.svelte` の中で別の `.svelte` を import すると `<Profile />` のようにコンポーネントとして呼び出せます（props / 子要素は未対応。詳細は [DESIGN.md](./DESIGN.md)）。
@@ -44,6 +44,6 @@ pnpm serve
 | `src/compiler/phases/3-transform/index.ts`      | `phases/3-transform/client/`           | ASTからJSコード文字列を生成（本家はテンプレートクローン+リアクティブ更新コード）          |
 | `Root.instance`（ルート直下の `<script>`）      | `AST.Root.instance`                    | instance script。ここから `.svelte` の import を抽出する                                  |
 | `Component` ノード（大文字始まりのタグ）        | `AST.Component`                        | コンポーネントタグ。生成コードでは関数呼び出しになる                                      |
-| `src/build.ts`                                  | vite-plugin-svelte + バンドラ          | import グラフをたどって各 `.svelte` をJSモジュールに変換する                              |
+| `src/lib/build.ts`                              | vite-plugin-svelte + バンドラ          | import グラフをたどって各 `.svelte` をJSモジュールに変換する                              |
 | `src/compiler/types.ts`                         | `types/template.d.ts`                  | ASTノード型（`Root` / `Fragment` / `RegularElement` …）                                   |
 | `src/compiler/errors.ts`                        | `errors.js` の `CompileError`          | 位置情報つきコンパイルエラー                                                              |
