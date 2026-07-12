@@ -4,7 +4,7 @@
   "description": "sveltejs/svelte の compiler() の仕組み（parse → analyze → transform）を参考にした、HTML解析のみのコンパイラ",
   "type": "module",
   "scripts": {
-    "demo": "node src/demo.ts",
+    "demo": "node src/lib/demo.ts",
     "build:app": "node src/lib/build.ts",
     "serve": "node src/lib/build.ts && node src/lib/serve.ts",
     "test": "node --test 'src/**/*.test.ts'",

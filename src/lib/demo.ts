@@ -4,7 +4,7 @@
  *   node src/demo.ts
  */
 import { inspect } from "node:util";
-import { compile } from "./compiler/index.ts";
+import { compile } from "../compiler/index.ts";
 
 const source = `<main>
 	<h1>svelte-mini-compiler demo</h1>
