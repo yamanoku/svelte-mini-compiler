@@ -2,7 +2,7 @@
 <section>
 	<h2>yamanoku's page</h2>
 	<p>1つ目の段落（終了タグ省略）
-	<p>2つ目の段落 &amp; エンティティ</p>
+	<p>2つ目の段落 & エンティティ</p>
 	<img src="avatar.svg">
 	<ul>
 		<li>りんご
