@@ -8,7 +8,6 @@
     "build:app": "node lib/build.ts",
     "serve": "node lib/build.ts && node lib/serve.ts",
     "test": "node --test 'src/**/*.test.ts'",
-    "build": "tsc",
     "check": "tsc --noEmit"
   },
   "devDependencies": {
