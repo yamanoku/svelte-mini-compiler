@@ -54,7 +54,7 @@ if (parser.eat("=")) {
 - parse がルート直下の `<script>` を `Root.instance` に、`<Profile />` を `Component` ノードにする
 - analyze が instance script から import を抽出し（本家は acorn でJSをパースするが、ここでは行単位の正規表現）、未 import のコンポーネント使用をエラーに、未使用の import を警告にする（本家のスコープ解決のミニ版）
 - transform が import を `./Profile.svelte` → `./Profile.js` に書き換えて出力し、コンポーネントタグを関数呼び出し `Profile(parent)` に変換する。モジュールはコンポーネント関数を default export する（本家と同じ形）
-- build（`src/lib/build.ts`）がエントリの `App.svelte` から import グラフをたどり、各ファイルを個別のJSモジュールにコンパイルする（本家で言う vite-plugin-svelte + バンドラの解決）
+- build（`lib/build.ts`）がエントリの `app/App.svelte` から import グラフをたどり、各ファイルを個別のJSモジュールにコンパイルする（本家で言う vite-plugin-svelte + バンドラの解決）
 
 ## 本家との違い（簡略化した点）
 
@@ -65,4 +65,4 @@ if (parser.eat("=")) {
 - analyze はスコープ解決やリアクティビティ解析を持たず、統計とa11y警告と import 抽出のミニ版のみ
 - transform はリアクティビティのない素朴な `document.createElement` の羅列を生成（本家はテンプレートのクローンと signal ベースの更新コードを生成する）
 - 文字参照テーブルは代表的なもののみ（本家は全named entityを持つ）
-- `<style>` はスコープ処理（セレクタへのハッシュ付与）をせず、`Root.css` の生のCSSをそのまま `css.code` として返すのみ。build（`src/lib/build.ts`）は各 `.svelte` の `css.code` を単純に連結して `public/bundle.css` に書き出す（本家はコンポーネントごとにスコープされたCSSを1つのスタイルシートにまとめる）
+- `<style>` はスコープ処理（セレクタへのハッシュ付与）をせず、`Root.css` の生のCSSをそのまま `css.code` として返すのみ。build（`lib/build.ts`）は各 `.svelte` の `css.code` を単純に連結して `public/bundle.css` に書き出す（本家はコンポーネントごとにスコープされたCSSを1つのスタイルシートにまとめる）

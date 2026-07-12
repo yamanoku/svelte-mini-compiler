@@ -1,10 +1,10 @@
 /**
  * デモ: サンプルHTMLをコンパイルして各フェーズの出力を表示する。
  *
- *   node src/demo.ts
+ *   node lib/demo.ts
  */
 import { inspect } from "node:util";
-import { compile } from "../compiler/index.ts";
+import { compile } from "../src/compiler/index.ts";
 
 const source = `<main>
 	<h1>svelte-mini-compiler demo</h1>

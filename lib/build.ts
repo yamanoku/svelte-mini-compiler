@@ -1,18 +1,18 @@
 /**
- * ビルド: src/App.svelte を起点に import グラフをたどりながら、
+ * ビルド: app/App.svelte を起点に import グラフをたどりながら、
  * 各 .svelte を compile() でJSモジュールに変換して public/ に書き出す。
  * 本家で言うと vite-plugin-svelte が `.svelte` ごとに compile() を呼び、
  * バンドラが import を解決してモジュールグラフを組む部分のミニ版。
  *
- *   node src/lib/build.ts
+ *   node lib/build.ts
  */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { compile, svelte_to_js_filename } from "../compiler/index.ts";
+import { compile, svelte_to_js_filename } from "../src/compiler/index.ts";
 
-const src_dir = fileURLToPath(new URL("../", import.meta.url));
-const out_dir = fileURLToPath(new URL("../../public/", import.meta.url));
+const src_dir = fileURLToPath(new URL("../app/", import.meta.url));
+const out_dir = fileURLToPath(new URL("../public/", import.meta.url));
 
 await mkdir(out_dir, { recursive: true });
 
@@ -31,7 +31,7 @@ while (queue.length > 0) {
   try {
     source = await readFile(join(src_dir, filename), "utf8");
   } catch {
-    console.error(`エラー: import された ./${filename} が src/ に見つかりません`);
+    console.error(`エラー: import された ./${filename} が app/ に見つかりません`);
     process.exit(1);
   }
 
@@ -47,7 +47,7 @@ while (queue.length > 0) {
   const out_path = join(out_dir, out_name);
   await mkdir(dirname(out_path), { recursive: true });
   await writeFile(out_path, result.js.code);
-  console.log(`src/${filename} -> public/${out_name} を出力しました`);
+  console.log(`app/${filename} -> public/${out_name} を出力しました`);
 
   if (result.css.code) {
     css_chunks.push(`/* ${filename} */\n${result.css.code}`);

@@ -22,7 +22,7 @@ import { CompileError } from "../../errors.ts";
 /** `import Profile from "./Profile.svelte";` の形にだけマッチする */
 const regex_import = /^import\s+([A-Za-z_$][\w$]*)\s+from\s+(["'])(.+?)\2\s*;?$/;
 
-/** import 元は「src/ 配下の相対 .svelte パス」のみ対応（`./` から始まる同一階層・サブディレクトリのみ。`../` によるトラバーサルは拒否） */
+/** import 元は「エントリポイント配下の相対 .svelte パス」のみ対応（`./` から始まる同一階層・サブディレクトリのみ。`../` によるトラバーサルは拒否） */
 const regex_import_source = /^\.\/(?:[A-Za-z0-9_$-]+\/)*[A-Za-z_$][\w$]*\.svelte$/;
 
 export function analyze(ast: Root, source: string): Analysis {

@@ -2,15 +2,15 @@
  * public/ を配信する最小の静的HTTPサーバー。
  * ESモジュールは file:// では読み込めないため、index.html の動作確認に使う。
  *
- *   node src/lib/serve.ts        # http://localhost:3000
- *   PORT=8080 node src/lib/serve.ts
+ *   node lib/serve.ts        # http://localhost:3000
+ *   PORT=8080 node lib/serve.ts
  */
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = fileURLToPath(new URL("../../public/", import.meta.url));
+const root = fileURLToPath(new URL("../public/", import.meta.url));
 const port = Number(process.env.PORT ?? 3000);
 
 const content_types: Record<string, string> = {
